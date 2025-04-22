@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Condense Knowledge</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jointjs/dist/joint.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/backbone/backbone-min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jointjs/dist/joint.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+  <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+  <style>
+    #cy, #joint-canvas, #mermaid-block {
+      width: 100%;
+      height: 600px;
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .card {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title is-3 has-text-primary">Condense Knowledge</h1>
+      <form action="/render" method="post">
+        <div class="field">
+          <label class="label">Paste Educational Text</label>
+          <div class="control">
+            <textarea class="textarea is-medium" name="user_text" placeholder="Paste your text here...">Newton’s Three Laws of Motion describe the relationship between a body and the forces acting on it. The first law states that a body remains at rest or in uniform motion unless acted upon. The second law relates force to mass and acceleration (F = ma). The third law states that every action has an equal and opposite reaction.</textarea>
+          </div>
+        </div>
+        <div class="control">
+          <button class="button is-link is-medium">Generate Concept Map</button>
+        </div>
+      </form>
+      
+      {% if data and data.error %}
+        <div class="notification is-danger is-light">
+            <strong>Error parsing concept map:</strong> {{ data.error }}
+        </div>
+      {% endif %}
+
+      {% if data %}
+      <!-- Cytoscape -->
+      <div class="card">
+        <header class="card-header" onclick="toggleCard('cy')">
+          <p class="card-header-title">Cytoscape View</p>
+        </header>
+        <div class="card-content">
+          <div class="content">
+            <div id="cy"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mermaid -->
+      <div class="card">
+        <header class="card-header" onclick="toggleCard('mermaid-block')">
+          <p class="card-header-title">Mermaid View</p>
+        </header>
+        <div class="card-content">
+          <div class="content">
+            <pre id="mermaid-block" class="mermaid">{{ mermaid_code }}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- JointJS -->
+      <div class="card">
+        <header class="card-header" onclick="toggleCard('joint-canvas')">
+          <p class="card-header-title">JointJS View</p>
+        </header>
+        <div class="card-content">
+          <div class="content">
+            <div id="joint-canvas"></div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if data %}
+  <script>
+    function toggleCard(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    const data = {{ data | tojson }};
+    const elements = [
+      ...data.nodes.map(n => ({ data: { id: n.id, label: n.label } })),
+      ...data.edges.map((e, i) => ({ data: { id: `e${i}`, source: e.source, target: e.target, label: e.relation } }))
+    ];
+
+    // Cytoscape
+    cytoscape({
+      container: document.getElementById('cy'),
+      elements: elements,
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'label': 'data(label)',
+            'background-color': '#0074D9',
+            'color': '#fff',
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'font-size': '14px'
+          }
+        },
+        {
+          selector: 'edge',
+          style: {
+            'curve-style': 'bezier',
+            'control-point-step-size': 40,
+            'label': 'data(label)',
+            'font-size': '10px',
+            'line-color': '#ccc',
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': '#ccc',
+            'text-rotation': 'autorotate',
+            'text-margin-y': '-10px'
+          }
+        }
+      ],
+      layout: { name: 'breadthfirst' }
+    });
+
+    // JointJS
+    const graph = new joint.dia.Graph();
+    const paper = new joint.dia.Paper({
+      el: document.getElementById('joint-canvas'),
+      model: graph,
+      width: '100%',
+      height: 600,
+      gridSize: 10,
+      drawGrid: true
+    });
+
+    const shapes = {};
+    data.nodes.forEach((node, index) => {
+      const shape = new joint.shapes.standard.Rectangle();
+      shape.position(100 + index * 150, 100);
+      shape.resize(120, 60);
+      shape.attr({
+        body: { fill: '#0074D9' },
+        label: { text: node.label, fill: 'white' }
+      });
+      shape.addTo(graph);
+      shapes[node.id] = shape;
+    });
+
+    data.edges.forEach(edge => {
+      if (shapes[edge.source] && shapes[edge.target]) {
+        new joint.shapes.standard.Link({
+          source: { id: shapes[edge.source].id },
+          target: { id: shapes[edge.target].id },
+          labels: [{ position: 0.5, attrs: { text: { text: edge.relation } } }]
+        }).addTo(graph);
+      }
+    });
+  </script>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,29 @@
+/* style.css - clean enhancements layered on top of Bulma */
+
+/* Better control over textarea */
+textarea {
+    min-height: 200px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+/* Space below the submit button */
+button {
+    margin-top: 10px;
+}
+
+/* Shared graph container styling */
+#cy, #joint-canvas, .mermaid {
+    width: 100%;
+    height: 600px;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fafafa;
+    display: block;
+}
+
+/* Card spacing for each view */
+.card {
+    margin-top: 30px;
+}

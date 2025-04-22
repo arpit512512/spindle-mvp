@@ -1,0 +1,5 @@
+Launch Spindle Server
+uvicorn app.main:app --reload
+
+Prompt Sample:
+Newton’s Three Laws of Motion describe the relationship between a body and the forces acting on it. The first law states that a body remains at rest or in uniform motion unless acted upon. The second law relates force to mass and acceleration (F = ma). The third law states that every action has an equal and opposite reaction.

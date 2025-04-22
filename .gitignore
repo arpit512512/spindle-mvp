@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.env
+.env
+
+# VSCode
+.vscode/
+
+# Logs
+logs/
+
+# Dependencies
+venv/
+*.egg-info/
+*.log
+
+# FastAPI static files cache (if any)
+static/build/
+

@@ -1,0 +1,22 @@
+spindle/
+├── app/
+│   ├── main.py               # Entry point of the application
+│   ├── core/
+│   │   ├── config.py         # Configuration settings
+│   │   └── templates.py      # Jinja2 template configuration
+│   ├── routers/
+│   │   └── concept_map.py    # Routes related to concept map generation
+│   ├── services/
+│   │   └── concept_map.py    # Business logic for concept map processing
+│   ├── templates/
+│   │   ├── base.html         # Base template
+│   │   └── concept_map.html  # Template for rendering concept maps
+│   └── static/
+│       ├── css/
+│       │   └── style.css     # Stylesheets
+│       └── js/
+│           └── concept_map.js # JavaScript for interactivity
+├── tests/
+│   └── test_concept_map.py   # Unit tests
+├── requirements.txt          # Project dependencies
+└── README.md                 # Project overview
